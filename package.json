@@ -1,0 +1,41 @@
+{
+  "name": "autoreply-tool",
+  "version": "1.1.0",
+  "description": "🤖 智能社群自動回覆工具 - 支援多平台 API 整合",
+  "main": "index.html",
+  "scripts": {
+    "start": "python -m http.server 8000",
+    "dev": "python -m http.server 8000",
+    "serve": "python -m http.server 8000",
+    "build": "echo 'No build step required for static site'",
+    "deploy": "echo 'Deploy to GitHub Pages'"
+  },
+  "keywords": [
+    "auto-reply",
+    "social-media",
+    "instagram",
+    "facebook",
+    "line",
+    "api",
+    "oauth",
+    "web-app",
+    "javascript",
+    "html5",
+    "css3"
+  ],
+  "author": "AutoReply Tool Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/autoreply-tool.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/autoreply-tool/issues"
+  },
+  "homepage": "https://yourusername.github.io/autoreply-tool",
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "devDependencies": {},
+  "dependencies": {}
+} 

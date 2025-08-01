@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🤖 AutoReply Tool - 自動回覆工具</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🤖</text></svg>">
+</head>
+<body>
+    <!-- 導航欄 -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <h1>🤖 AutoReply Tool</h1>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="#dashboard" class="nav-link active" data-page="dashboard">
+                        📊 儀表板
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#auto-reply" class="nav-link" data-page="auto-reply">
+                        🤖 自動回覆
+                    </a>
+                </li>
+            </ul>
+            <div class="hamburger">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主要內容區域 -->
+    <main class="main-content">
+        <!-- 儀表板頁面 -->
+        <div id="dashboard" class="page active">
+            <div class="page-header">
+                <h2>📊 儀表板</h2>
+                <p>歡迎使用 AutoReply Tool！這裡是您的自動回覆管理總覽。</p>
+                <div class="header-actions">
+                    <button class="btn btn-outline" onclick="refreshDashboard()">
+                        🔄 重新整理
+                    </button>
+                    <button class="btn btn-outline" onclick="exportData()">
+                        📤 匯出資料
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 統計卡片區域 -->
+            <div class="dashboard-grid">
+                <div class="dashboard-card primary-card">
+                    <div class="card-icon">📱</div>
+                    <div class="card-content">
+                        <h3>已連接帳號</h3>
+                        <p class="card-number" id="connected-accounts">0</p>
+                        <p class="card-trend positive" id="accounts-trend">+2 本月</p>
+                    </div>
+                </div>
+                
+                <div class="dashboard-card success-card">
+                    <div class="card-icon">🤖</div>
+                    <div class="card-content">
+                        <h3>啟用規則</h3>
+                        <p class="card-number" id="active-rules">0</p>
+                        <p class="card-trend" id="rules-trend">5 個待處理</p>
+                    </div>
+                </div>
+                
+                <div class="dashboard-card info-card">
+                    <div class="card-icon">💬</div>
+                    <div class="card-content">
+                        <h3>今日回覆</h3>
+                        <p class="card-number" id="today-replies">0</p>
+                        <p class="card-trend" id="replies-trend">+15% 較昨日</p>
+                    </div>
+                </div>
+                
+                <div class="dashboard-card warning-card">
+                    <div class="card-icon">📊</div>
+                    <div class="card-content">
+                        <h3>回覆率</h3>
+                        <p class="card-number" id="reply-rate">0%</p>
+                        <p class="card-trend positive" id="rate-trend">+5% 成長率</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 主要內容區域 -->
+            <div class="dashboard-main">
+                <!-- 快速操作區域 -->
+                <div class="quick-actions-section">
+                    <div class="section-header">
+                        <h3>🚀 快速操作</h3>
+                        <p>常用功能快速存取</p>
+                    </div>
+                    <div class="action-grid">
+                        <button class="action-card" onclick="showAddAccountModal()">
+                            <div class="action-icon">📱</div>
+                            <div class="action-content">
+                                <h4>新增帳號</h4>
+                                <p>連接新的社群平台帳號</p>
+                            </div>
+                        </button>
+                        <button class="action-card" onclick="showAddRuleModal()">
+                            <div class="action-icon">🤖</div>
+                            <div class="action-content">
+                                <h4>新增規則</h4>
+                                <p>建立自動回覆規則</p>
+                            </div>
+                        </button>
+                        <button class="action-card" onclick="showAddTemplateModal()">
+                            <div class="action-icon">📝</div>
+                            <div class="action-content">
+                                <h4>新增範本</h4>
+                                <p>建立回覆內容範本</p>
+                            </div>
+                        </button>
+                        <button class="action-card" onclick="navigateToPage('auto-reply')">
+                            <div class="action-icon">⚙️</div>
+                            <div class="action-content">
+                                <h4>進階設定</h4>
+                                <p>管理自動回覆詳細設定</p>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- 側邊欄 -->
+                <div class="dashboard-sidebar">
+                    <!-- 最近活動 -->
+                    <div class="recent-activities">
+                        <div class="section-header">
+                            <h3>📋 最近活動</h3>
+                            <button class="btn btn-sm btn-outline" onclick="viewAllActivities()">查看全部</button>
+                        </div>
+                        <div class="activities-list" id="recent-activities-list">
+                            <!-- 活動列表將由 JavaScript 動態生成 -->
+                        </div>
+                    </div>
+                    
+                    <!-- 系統通知 -->
+                    <div class="system-notifications">
+                        <div class="section-header">
+                            <h3>🔔 系統通知</h3>
+                            <button class="btn btn-sm btn-outline" onclick="markAllAsRead()">全部已讀</button>
+                        </div>
+                        <div class="notifications-list" id="notifications-list">
+                            <!-- 通知列表將由 JavaScript 動態生成 -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 自動回覆管理頁面 -->
+        <div id="auto-reply" class="page">
+            <div class="page-header">
+                <h2>🤖 自動回覆管理</h2>
+                <p>管理社群平台的自動回覆規則和設定。</p>
+            </div>
+            
+            <!-- 自動回覆儀表板 -->
+            <div class="auto-reply-dashboard">
+                <div class="dashboard-grid">
+                    <div class="dashboard-card">
+                        <div class="card-icon">📱</div>
+                        <div class="card-content">
+                            <h3>已連接帳號</h3>
+                            <p class="card-number" id="connected-accounts-detail">0</p>
+                        </div>
+                    </div>
+                    
+                    <div class="dashboard-card">
+                        <div class="card-icon">🤖</div>
+                        <div class="card-content">
+                            <h3>啟用規則</h3>
+                            <p class="card-number" id="active-rules-detail">0</p>
+                        </div>
+                    </div>
+                    
+                    <div class="dashboard-card">
+                        <div class="card-icon">💬</div>
+                        <div class="card-content">
+                            <h3>今日回覆</h3>
+                            <p class="card-number" id="today-replies-detail">0</p>
+                        </div>
+                    </div>
+                    
+                    <div class="dashboard-card">
+                        <div class="card-icon">📊</div>
+                        <div class="card-content">
+                            <h3>回覆率</h3>
+                            <p class="card-number" id="reply-rate-detail">0%</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 功能標籤頁 -->
+            <div class="auto-reply-tabs">
+                <div class="tab-buttons">
+                    <button class="tab-btn active" data-tab="accounts">📱 帳號管理</button>
+                    <button class="tab-btn" data-tab="rules">🤖 回覆規則</button>
+                    <button class="tab-btn" data-tab="templates">📝 回覆範本</button>
+                    <button class="tab-btn" data-tab="schedule">⏰ 排程管理</button>
+                    <button class="tab-btn" data-tab="analytics">📈 回覆統計</button>
+                </div>
+
+                <!-- 帳號管理標籤頁 -->
+                <div id="accounts" class="tab-content active">
+                    <div class="tab-header">
+                        <h3>📱 社群帳號管理</h3>
+                        <button class="btn btn-primary" onclick="showAddAccountModal()">
+                            ➕ 新增帳號
+                        </button>
+                    </div>
+                    <div class="accounts-list" id="accounts-list">
+                        <!-- 帳號列表將由 JavaScript 動態生成 -->
+                    </div>
+                </div>
+
+                <!-- 回覆規則標籤頁 -->
+                <div id="rules" class="tab-content">
+                    <div class="tab-header">
+                        <h3>🤖 自動回覆規則</h3>
+                        <button class="btn btn-primary" onclick="showAddRuleModal()">
+                            ➕ 新增規則
+                        </button>
+                    </div>
+                    <div class="rules-list" id="rules-list">
+                        <!-- 規則列表將由 JavaScript 動態生成 -->
+                    </div>
+                </div>
+
+                <!-- 回覆範本標籤頁 -->
+                <div id="templates" class="tab-content">
+                    <div class="tab-header">
+                        <h3>📝 回覆範本管理</h3>
+                        <button class="btn btn-primary" onclick="showAddTemplateModal()">
+                            ➕ 新增範本
+                        </button>
+                    </div>
+                    <div class="templates-list" id="templates-list">
+                        <!-- 範本列表將由 JavaScript 動態生成 -->
+                    </div>
+                </div>
+
+                <!-- 排程管理標籤頁 -->
+                <div id="schedule" class="tab-content">
+                    <div class="tab-header">
+                        <h3>⏰ 排程管理</h3>
+                        <button class="btn btn-primary" onclick="showAddScheduleModal()">
+                            ➕ 新增排程
+                        </button>
+                    </div>
+                    <div class="schedule-list" id="schedule-list">
+                        <!-- 排程列表將由 JavaScript 動態生成 -->
+                    </div>
+                </div>
+
+                <!-- 回覆統計標籤頁 -->
+                <div id="analytics" class="tab-content">
+                    <div class="tab-header">
+                        <h3>📈 回覆統計分析</h3>
+                    </div>
+                    <div class="analytics-content">
+                        <div class="analytics-grid">
+                            <div class="analytics-card">
+                                <h4>回覆趨勢</h4>
+                                <div class="chart-container" id="reply-trend-chart">
+                                    <!-- 圖表將由 JavaScript 生成 -->
+                                </div>
+                            </div>
+                            <div class="analytics-card">
+                                <h4>平台分布</h4>
+                                <div class="chart-container" id="platform-distribution-chart">
+                                    <!-- 圖表將由 JavaScript 生成 -->
+                                </div>
+                            </div>
+                        </div>
+                        <div class="recent-replies">
+                            <h4>最近回覆記錄</h4>
+                            <div class="replies-list" id="recent-replies-list">
+                                <!-- 最近回覆記錄將由 JavaScript 生成 -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 模態框容器 -->
+    <div id="modal-container"></div>
+
+    <!-- 通知容器 -->
+    <div id="notification-container"></div>
+
+    <!-- JavaScript -->
+    <script src="config/api-config.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/api-manager.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html> 
