@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)
+![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 ![Platform](https://img.shields.io/badge/platform-Web-orange.svg)
 ![Storage](https://img.shields.io/badge/storage-LocalStorage-yellow.svg)
@@ -43,8 +43,8 @@
 
 1. **下載專案**
    ```bash
-   git clone https://github.com/your-username/autoreply-tool.git
-   cd autoreply-tool
+   git clone https://github.com/TTtheAsian/Autoreply.git
+   cd Autoreply
    ```
 
 2. **開啟應用程式**
@@ -76,15 +76,26 @@
 ### 專案結構
 
 ```
-autoreply-tool/
+Autoreply/
 ├── index.html              # 主頁面
+├── oauth-callback.html     # OAuth 回調頁面
 ├── css/
 │   └── style.css          # 樣式檔案
 ├── js/
 │   ├── app.js             # 主要應用邏輯
 │   ├── storage.js         # 資料儲存管理
-│   └── ui.js              # UI 元件
+│   ├── ui.js              # UI 元件
+│   └── api-manager.js     # API 管理器
+├── config/
+│   └── api-config.js      # API 配置
+├── docs/
+│   ├── API_INTEGRATION_GUIDE.md
+│   └── DEPLOYMENT_GUIDE.md
+├── .github/workflows/
+│   └── deploy.yml         # GitHub Actions 部署
 ├── README.md              # 專案說明
+├── package.json           # 專案配置
+├── LICENSE                # MIT 授權
 └── RULES.json             # AI 助手規則
 ```
 
@@ -93,6 +104,8 @@ autoreply-tool/
 - **AutoReplyTool**：主要應用程式類別
 - **StorageManager**：LocalStorage 資料管理
 - **UIHelper**：動態 UI 元件生成
+- **APIManager**：社群平台 API 整合管理
+- **OAuthHandler**：OAuth 2.0 認證處理
 
 ---
 
@@ -162,8 +175,8 @@ autoreply-tool/
 
 1. **克隆專案**
    ```bash
-   git clone https://github.com/your-username/autoreply-tool.git
-   cd autoreply-tool
+   git clone https://github.com/TTtheAsian/Autoreply.git
+   cd Autoreply
    ```
 
 2. **啟動開發伺服器**
@@ -193,7 +206,7 @@ autoreply-tool/
 
 2. **推送到 GitHub**
    ```bash
-   git remote add origin https://github.com/YOUR_USERNAME/autoreply-tool.git
+   git remote add origin https://github.com/TTtheAsian/Autoreply.git
    git branch -M main
    git push -u origin main
    ```
@@ -207,7 +220,7 @@ autoreply-tool/
 4. **自動部署**
    - 專案已包含 GitHub Actions 工作流程
    - 推送到 `main` 分支會自動部署
-   - 訪問：`https://YOUR_USERNAME.github.io/autoreply-tool`
+   - 訪問：`https://TTtheAsian.github.io/Autoreply`
 
 詳細部署指南請參考：[📖 部署指南](docs/DEPLOYMENT_GUIDE.md)
 
@@ -271,9 +284,40 @@ autoreply-tool/
 
 ## 📞 聯絡資訊
 
-- **專案維護者**：[Your Name](mailto:your.email@example.com)
-- **專案網址**：https://github.com/your-username/autoreply-tool
-- **問題回報**：https://github.com/your-username/autoreply-tool/issues
+- **專案維護者**：[TTtheAsian](https://github.com/TTtheAsian)
+- **專案網址**：https://github.com/TTtheAsian/Autoreply
+- **線上演示**：https://TTtheAsian.github.io/Autoreply
+- **問題回報**：https://github.com/TTtheAsian/Autoreply/issues
+
+## 🌐 線上演示
+
+### 🚀 立即體驗
+- **線上版本**：https://TTtheAsian.github.io/Autoreply
+- **本地版本**：http://localhost:8000
+
+### 📱 功能預覽
+- 🤖 **智能自動回覆**：基於關鍵字的智能回覆規則
+- 📱 **多平台支援**：Instagram、Facebook、Twitter、Line、Telegram、WhatsApp
+- 🔗 **實際 API 整合**：OAuth 2.0 認證和實際平台連接
+- 📊 **數據分析**：詳細的回覆統計和分析報告
+- 💾 **本地儲存**：所有資料安全儲存在本地
+
+## 🎯 專案狀態
+
+### ✅ 已完成功能
+- 🏗️ **專案初始化**：完整的專案架構和配置
+- 🎨 **主頁面設計**：現代化響應式儀表板
+- 📱 **帳號管理**：多平台帳號連接管理
+- 🤖 **回覆規則**：智能關鍵字觸發規則
+- 📝 **範本管理**：回覆內容範本系統
+- ⏰ **排程管理**：時間控制排程功能
+- 📊 **統計分析**：回覆數據統計儀表板
+- 🔗 **API 整合**：實際社群平台 API 整合
+- 🚀 **GitHub 部署**：自動部署到 GitHub Pages
+
+### 🔄 開發中功能
+- 🔐 **OAuth 認證**：完整的第三方平台認證流程
+- ⚡ **速率限制**：API 速率限制管理機制
 
 ---
 
@@ -281,6 +325,6 @@ autoreply-tool/
 
 **⭐ 如果這個專案對您有幫助，請給我們一個星標！**
 
-Made with ❤️ by [Your Name]
+Made with ❤️ by [TTtheAsian](https://github.com/TTtheAsian)
 
 </div> 
