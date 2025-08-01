@@ -27,12 +27,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/autoreply-tool.git"
+    "url": "https://github.com/TTtheAsian/Autoreply.git"
   },
   "bugs": {
-    "url": "https://github.com/yourusername/autoreply-tool/issues"
+    "url": "https://github.com/TTtheAsian/Autoreply/issues"
   },
-  "homepage": "https://yourusername.github.io/autoreply-tool",
+  "homepage": "https://TTtheAsian.github.io/Autoreply",
   "engines": {
     "node": ">=14.0.0"
   },
