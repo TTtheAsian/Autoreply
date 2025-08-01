@@ -271,15 +271,15 @@ autoreply-tool/
 
 ## 📞 聯絡資訊
 
-- **專案維護者**：[Your Name](mailto:your.email@example.com)
-- **專案網址**：https://github.com/your-username/autoreply-tool
-- **問題回報**：https://github.com/your-username/autoreply-tool/issues
+- **專案維護者**：[TT]
+- **專案網址**：在這呢
+- **問題回報**：不存在
 
 ---
 
 <div align="center">
 
-**⭐ 如果這個專案對您有幫助，請給我們一個星標！**
+**⭐ 如果這個專案對您有幫助，請給我們一個鼓勵！**
 
 Made with ❤️ by [TT]
 
