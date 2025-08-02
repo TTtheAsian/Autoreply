@@ -1,6 +1,9 @@
 // API 管理器 - 處理實際社群平台整合
 class APIManager {
     constructor() {
+        this.securityManager = new SecurityManager();
+        this.rateLimiter = new RateLimiter();
+        this.errorHandler = new ErrorHandler();
         this.platforms = {
             instagram: {
                 name: 'Instagram',
@@ -38,12 +41,15 @@ class APIManager {
         };
         
         this.activeConnections = new Map();
-        this.rateLimitTrackers = new Map();
     }
 
     // 初始化 API 管理器
     async init() {
         console.log('🔌 API 管理器初始化中...');
+        
+        // 初始化安全管理器
+        await this.securityManager.init();
+        
         await this.loadStoredConnections();
         await this.validateStoredTokens();
     }
@@ -54,13 +60,16 @@ class APIManager {
         const accounts = storage.getAutoreplyAccounts();
         
         for (const account of accounts) {
-            if (account.apiKey && account.accessToken) {
+            // 從安全儲存獲取 Token
+            const secureToken = await this.securityManager.secureGetToken(account.id);
+            
+            if (secureToken && secureToken.accessToken) {
                 this.activeConnections.set(account.id, {
                     platform: account.platform,
                     username: account.username,
-                    accessToken: account.accessToken,
-                    refreshToken: account.refreshToken,
-                    expiresAt: account.expiresAt
+                    accessToken: secureToken.accessToken,
+                    refreshToken: secureToken.refreshToken,
+                    expiresAt: secureToken.expiresAt
                 });
             }
         }
@@ -69,7 +78,7 @@ class APIManager {
     // 驗證已儲存的 Token
     async validateStoredTokens() {
         for (const [accountId, connection] of this.activeConnections) {
-            if (connection.expiresAt && new Date(connection.expiresAt) <= new Date()) {
+            if (this.securityManager.isTokenExpired(connection)) {
                 await this.refreshAccessToken(accountId, connection);
             }
         }
@@ -130,6 +139,13 @@ class APIManager {
 
             this.activeConnections.set(accountId, connection);
 
+            // 安全儲存 Token
+            await this.securityManager.secureStoreToken(accountId, {
+                accessToken: connection.accessToken,
+                refreshToken: connection.refreshToken,
+                expiresAt: connection.expiresAt
+            });
+            
             // 更新儲存中的帳號資訊
             const storage = new StorageManager();
             const accounts = storage.getAutoreplyAccounts();
@@ -138,7 +154,6 @@ class APIManager {
             if (accountIndex !== -1) {
                 accounts[accountIndex] = {
                     ...accounts[accountIndex],
-                    ...connection,
                     status: 'connected'
                 };
                 storage.saveAutoreplyAccounts(accounts);
@@ -213,7 +228,14 @@ class APIManager {
 
             this.activeConnections.set(accountId, connection);
 
-            // 更新儲存
+            // 安全儲存更新的 Token
+            await this.securityManager.secureStoreToken(accountId, {
+                accessToken: connection.accessToken,
+                refreshToken: connection.refreshToken,
+                expiresAt: connection.expiresAt
+            });
+            
+            // 更新儲存中的帳號狀態
             const storage = new StorageManager();
             const accounts = storage.getAutoreplyAccounts();
             const accountIndex = accounts.findIndex(acc => acc.id === accountId);
@@ -221,9 +243,7 @@ class APIManager {
             if (accountIndex !== -1) {
                 accounts[accountIndex] = {
                     ...accounts[accountIndex],
-                    accessToken: connection.accessToken,
-                    refreshToken: connection.refreshToken,
-                    expiresAt: connection.expiresAt
+                    status: 'connected'
                 };
                 storage.saveAutoreplyAccounts(accounts);
             }
@@ -245,13 +265,11 @@ class APIManager {
         }
 
         // 檢查速率限制
-        if (!this.checkRateLimit(accountId, connection.platform)) {
-            throw new Error('已達到速率限制，請稍後再試');
-        }
+        this.rateLimiter.checkRateLimit(accountId, connection.platform);
 
         const platformConfig = this.platforms[connection.platform];
         
-        try {
+        return await this.errorHandler.retryApiCall(async () => {
             let response;
             
             switch (connection.platform) {
@@ -269,7 +287,7 @@ class APIManager {
             }
 
             // 記錄成功發送
-            this.recordRateLimitUsage(accountId, connection.platform);
+            this.rateLimiter.recordRequest(accountId, connection.platform);
             
             return {
                 success: true,
@@ -277,10 +295,7 @@ class APIManager {
                 platform: connection.platform,
                 timestamp: new Date().toISOString()
             };
-        } catch (error) {
-            console.error('發送自動回覆失敗:', error);
-            throw new Error(`發送失敗: ${error.message}`);
-        }
+        }, { accountId, platform: connection.platform, action: 'sendAutoreply' });
     }
 
     // 發送 Instagram 回覆
@@ -354,32 +369,15 @@ class APIManager {
     }
 
     // 檢查速率限制
-    checkRateLimit(accountId, platform) {
-        const tracker = this.rateLimitTrackers.get(accountId) || [];
-        const platformConfig = this.platforms[platform];
-        const now = Date.now();
-        
-        // 清理過期的請求記錄
-        const validRequests = tracker.filter(timestamp => 
-            now - timestamp < platformConfig.rateLimit.window * 1000
-        );
-        
-        this.rateLimitTrackers.set(accountId, validRequests);
-        
-        return validRequests.length < platformConfig.rateLimit.requests;
-    }
 
-    // 記錄速率限制使用
-    recordRateLimitUsage(accountId, platform) {
-        const tracker = this.rateLimitTrackers.get(accountId) || [];
-        tracker.push(Date.now());
-        this.rateLimitTrackers.set(accountId, tracker);
-    }
 
     // 斷開帳號連接
-    disconnectAccount(accountId) {
+    async disconnectAccount(accountId) {
         this.activeConnections.delete(accountId);
-        this.rateLimitTrackers.delete(accountId);
+        this.rateLimiter.clearAccountTracker(accountId);
+        
+        // 清除安全儲存的 Token
+        await this.securityManager.clearSecureData(accountId);
         
         // 更新儲存中的帳號狀態
         const storage = new StorageManager();
@@ -388,9 +386,6 @@ class APIManager {
         
         if (accountIndex !== -1) {
             accounts[accountIndex].status = 'disconnected';
-            accounts[accountIndex].accessToken = null;
-            accounts[accountIndex].refreshToken = null;
-            accounts[accountIndex].expiresAt = null;
             storage.saveAutoreplyAccounts(accounts);
         }
     }
