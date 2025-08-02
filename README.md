@@ -1,5 +1,7 @@
 # 🤖 Autoreply - 智能社群自動回覆工具
 
+[![Deploy to GitHub Pages](https://github.com/TTtheAsian/Autoreply/workflows/Deploy%20to%20GitHub%20Pages/badge.svg)](https://github.com/TTtheAsian/Autoreply/actions)
+
 <div align="center">
 
 ![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)
