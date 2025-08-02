@@ -51,7 +51,7 @@ class APIManager {
     // 載入已儲存的連接
     async loadStoredConnections() {
         const storage = new StorageManager();
-        const accounts = storage.getAutoReplyAccounts();
+        const accounts = storage.getAutoreplyAccounts();
         
         for (const account of accounts) {
             if (account.apiKey && account.accessToken) {
@@ -132,7 +132,7 @@ class APIManager {
 
             // 更新儲存中的帳號資訊
             const storage = new StorageManager();
-            const accounts = storage.getAutoReplyAccounts();
+            const accounts = storage.getAutoreplyAccounts();
             const accountIndex = accounts.findIndex(acc => acc.id === accountId);
             
             if (accountIndex !== -1) {
@@ -141,7 +141,7 @@ class APIManager {
                     ...connection,
                     status: 'connected'
                 };
-                storage.saveAutoReplyAccounts(accounts);
+                storage.saveAutoreplyAccounts(accounts);
             }
 
             // 清理 session storage
@@ -215,7 +215,7 @@ class APIManager {
 
             // 更新儲存
             const storage = new StorageManager();
-            const accounts = storage.getAutoReplyAccounts();
+            const accounts = storage.getAutoreplyAccounts();
             const accountIndex = accounts.findIndex(acc => acc.id === accountId);
             
             if (accountIndex !== -1) {
@@ -225,7 +225,7 @@ class APIManager {
                     refreshToken: connection.refreshToken,
                     expiresAt: connection.expiresAt
                 };
-                storage.saveAutoReplyAccounts(accounts);
+                storage.saveAutoreplyAccounts(accounts);
             }
 
             return true;
@@ -238,7 +238,7 @@ class APIManager {
     }
 
     // 發送自動回覆訊息
-    async sendAutoReply(accountId, message, recipientId = null) {
+    async sendAutoreply(accountId, message, recipientId = null) {
         const connection = this.activeConnections.get(accountId);
         if (!connection) {
             throw new Error('帳號未連接');
@@ -383,7 +383,7 @@ class APIManager {
         
         // 更新儲存中的帳號狀態
         const storage = new StorageManager();
-        const accounts = storage.getAutoReplyAccounts();
+        const accounts = storage.getAutoreplyAccounts();
         const accountIndex = accounts.findIndex(acc => acc.id === accountId);
         
         if (accountIndex !== -1) {
@@ -391,7 +391,7 @@ class APIManager {
             accounts[accountIndex].accessToken = null;
             accounts[accountIndex].refreshToken = null;
             accounts[accountIndex].expiresAt = null;
-            storage.saveAutoReplyAccounts(accounts);
+            storage.saveAutoreplyAccounts(accounts);
         }
     }
 

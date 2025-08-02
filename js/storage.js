@@ -3,25 +3,28 @@ class StorageManager {
     constructor() {
         this.storageKeys = {
             settings: 'autoreply_settings',
-            autoReplyAccounts: 'autoreply_accounts',
-            autoReplyRules: 'autoreply_rules',
-            autoReplyTemplates: 'autoreply_templates',
-            autoReplySchedules: 'autoreply_schedules',
-            autoReplyLogs: 'autoreply_logs'
+            autoreplyAccounts: 'autoreply_accounts',
+            autoreplyRules: 'autoreply_rules',
+            autoreplyTemplates: 'autoreply_templates',
+            autoreplySchedules: 'autoreply_schedules',
+            autoreplyLogs: 'autoreply_logs'
         };
         this.init();
     }
 
     // 初始化儲存空間
     init() {
-        // 檢查並初始化預設資料
-        if (!this.getAutoReplyAccounts().length) {
-            this.initSampleData();
+        // 檢查是否為首次使用
+        const isFirstTime = !localStorage.getItem('autoreply_initialized');
+        if (isFirstTime) {
+            // 設定初始化標記
+            localStorage.setItem('autoreply_initialized', 'true');
+            // 不自動載入範例資料，讓使用者選擇
         }
     }
 
-    // 初始化範例資料
-    initSampleData() {
+    // 載入範例資料（用於測試）
+    loadSampleData() {
         // 範例自動回覆帳號
         const sampleAccounts = [
             {
@@ -156,11 +159,16 @@ class StorageManager {
         ];
 
         // 儲存範例資料
-        this.saveAutoReplyAccounts(sampleAccounts);
-        this.saveAutoReplyRules(sampleRules);
-        this.saveAutoReplyTemplates(sampleTemplates);
-        this.saveAutoReplySchedules(sampleSchedules);
-        this.saveAutoReplyLogs(sampleLogs);
+        this.saveAutoreplyAccounts(sampleAccounts);
+        this.saveAutoreplyRules(sampleRules);
+        this.saveAutoreplyTemplates(sampleTemplates);
+        this.saveAutoreplySchedules(sampleSchedules);
+        this.saveAutoreplyLogs(sampleLogs);
+        
+        // 顯示成功訊息
+        if (typeof showNotification === 'function') {
+            showNotification('✅ 範例資料已載入完成！', 'success');
+        }
     }
 
     // 生成唯一 ID
@@ -218,11 +226,11 @@ class StorageManager {
     exportData() {
         return {
             settings: this.getSettings(),
-            autoReplyAccounts: this.getAutoReplyAccounts(),
-            autoReplyRules: this.getAutoReplyRules(),
-            autoReplyTemplates: this.getAutoReplyTemplates(),
-            autoReplySchedules: this.getAutoReplySchedules(),
-            autoReplyLogs: this.getAutoReplyLogs(),
+            autoreplyAccounts: this.getAutoreplyAccounts(),
+            autoreplyRules: this.getAutoreplyRules(),
+            autoreplyTemplates: this.getAutoreplyTemplates(),
+            autoreplySchedules: this.getAutoreplySchedules(),
+            autoreplyLogs: this.getAutoreplyLogs(),
             exportDate: new Date().toISOString()
         };
     }
@@ -231,11 +239,11 @@ class StorageManager {
     importData(data) {
         try {
             if (data.settings) this.saveSettings(data.settings);
-            if (data.autoReplyAccounts) this.saveAutoReplyAccounts(data.autoReplyAccounts);
-            if (data.autoReplyRules) this.saveAutoReplyRules(data.autoReplyRules);
-            if (data.autoReplyTemplates) this.saveAutoReplyTemplates(data.autoReplyTemplates);
-            if (data.autoReplySchedules) this.saveAutoReplySchedules(data.autoReplySchedules);
-            if (data.autoReplyLogs) this.saveAutoReplyLogs(data.autoReplyLogs);
+            if (data.autoreplyAccounts) this.saveAutoreplyAccounts(data.autoreplyAccounts);
+            if (data.autoreplyRules) this.saveAutoreplyRules(data.autoreplyRules);
+            if (data.autoreplyTemplates) this.saveAutoreplyTemplates(data.autoreplyTemplates);
+            if (data.autoreplySchedules) this.saveAutoreplySchedules(data.autoreplySchedules);
+            if (data.autoreplyLogs) this.saveAutoreplyLogs(data.autoreplyLogs);
             return true;
         } catch (error) {
             console.error('匯入資料失敗:', error);
@@ -316,140 +324,140 @@ class StorageManager {
     }
 
     // 自動回覆帳號管理
-    getAutoReplyAccounts() {
-        return this.loadData(this.storageKeys.autoReplyAccounts, []);
+    getAutoreplyAccounts() {
+        return this.loadData(this.storageKeys.autoreplyAccounts, []);
     }
 
-    saveAutoReplyAccounts(accounts) {
-        return this.saveData(this.storageKeys.autoReplyAccounts, accounts);
+    saveAutoreplyAccounts(accounts) {
+        return this.saveData(this.storageKeys.autoreplyAccounts, accounts);
     }
 
-    addAutoReplyAccount(account) {
-        const accounts = this.getAutoReplyAccounts();
+    addAutoreplyAccount(account) {
+        const accounts = this.getAutoreplyAccounts();
         accounts.push(account);
-        return this.saveAutoReplyAccounts(accounts);
+        return this.saveAutoreplyAccounts(accounts);
     }
 
-    updateAutoReplyAccount(id, updates) {
-        const accounts = this.getAutoReplyAccounts();
+    updateAutoreplyAccount(id, updates) {
+        const accounts = this.getAutoreplyAccounts();
         const index = accounts.findIndex(account => account.id === id);
         if (index !== -1) {
             accounts[index] = { ...accounts[index], ...updates };
-            return this.saveAutoReplyAccounts(accounts);
+            return this.saveAutoreplyAccounts(accounts);
         }
         return false;
     }
 
-    deleteAutoReplyAccount(id) {
-        const accounts = this.getAutoReplyAccounts();
+    deleteAutoreplyAccount(id) {
+        const accounts = this.getAutoreplyAccounts();
         const filteredAccounts = accounts.filter(account => account.id !== id);
-        return this.saveAutoReplyAccounts(filteredAccounts);
+        return this.saveAutoreplyAccounts(accounts);
     }
 
     // 自動回覆規則管理
-    getAutoReplyRules() {
-        return this.loadData(this.storageKeys.autoReplyRules, []);
+    getAutoreplyRules() {
+        return this.loadData(this.storageKeys.autoreplyRules, []);
     }
 
-    saveAutoReplyRules(rules) {
-        return this.saveData(this.storageKeys.autoReplyRules, rules);
+    saveAutoreplyRules(rules) {
+        return this.saveData(this.storageKeys.autoreplyRules, rules);
     }
 
-    addAutoReplyRule(rule) {
-        const rules = this.getAutoReplyRules();
+    addAutoreplyRule(rule) {
+        const rules = this.getAutoreplyRules();
         rules.push(rule);
-        return this.saveAutoReplyRules(rules);
+        return this.saveAutoreplyRules(rules);
     }
 
-    updateAutoReplyRule(id, updates) {
-        const rules = this.getAutoReplyRules();
+    updateAutoreplyRule(id, updates) {
+        const rules = this.getAutoreplyRules();
         const index = rules.findIndex(rule => rule.id === id);
         if (index !== -1) {
             rules[index] = { ...rules[index], ...updates };
-            return this.saveAutoReplyRules(rules);
+            return this.saveAutoreplyRules(rules);
         }
         return false;
     }
 
-    deleteAutoReplyRule(id) {
-        const rules = this.getAutoReplyRules();
+    deleteAutoreplyRule(id) {
+        const rules = this.getAutoreplyRules();
         const filteredRules = rules.filter(rule => rule.id !== id);
-        return this.saveAutoReplyRules(filteredRules);
+        return this.saveAutoreplyRules(filteredRules);
     }
 
     // 自動回覆範本管理
-    getAutoReplyTemplates() {
-        return this.loadData(this.storageKeys.autoReplyTemplates, []);
+    getAutoreplyTemplates() {
+        return this.loadData(this.storageKeys.autoreplyTemplates, []);
     }
 
-    saveAutoReplyTemplates(templates) {
-        return this.saveData(this.storageKeys.autoReplyTemplates, templates);
+    saveAutoreplyTemplates(templates) {
+        return this.saveData(this.storageKeys.autoreplyTemplates, templates);
     }
 
-    addAutoReplyTemplate(template) {
-        const templates = this.getAutoReplyTemplates();
+    addAutoreplyTemplate(template) {
+        const templates = this.getAutoreplyTemplates();
         templates.push(template);
-        return this.saveAutoReplyTemplates(templates);
+        return this.saveAutoreplyTemplates(templates);
     }
 
-    updateAutoReplyTemplate(id, updates) {
-        const templates = this.getAutoReplyTemplates();
+    updateAutoreplyTemplate(id, updates) {
+        const templates = this.getAutoreplyTemplates();
         const index = templates.findIndex(template => template.id === id);
         if (index !== -1) {
             templates[index] = { ...templates[index], ...updates };
-            return this.saveAutoReplyTemplates(templates);
+            return this.saveAutoreplyTemplates(templates);
         }
         return false;
     }
 
-    deleteAutoReplyTemplate(id) {
-        const templates = this.getAutoReplyTemplates();
+    deleteAutoreplyTemplate(id) {
+        const templates = this.getAutoreplyTemplates();
         const filteredTemplates = templates.filter(template => template.id !== id);
-        return this.saveAutoReplyTemplates(filteredTemplates);
+        return this.saveAutoreplyTemplates(filteredTemplates);
     }
 
     // 自動回覆排程管理
-    getAutoReplySchedules() {
-        return this.loadData(this.storageKeys.autoReplySchedules, []);
+    getAutoreplySchedules() {
+        return this.loadData(this.storageKeys.autoreplySchedules, []);
     }
 
-    saveAutoReplySchedules(schedules) {
-        return this.saveData(this.storageKeys.autoReplySchedules, schedules);
+    saveAutoreplySchedules(schedules) {
+        return this.saveData(this.storageKeys.autoreplySchedules, schedules);
     }
 
-    addAutoReplySchedule(schedule) {
-        const schedules = this.getAutoReplySchedules();
+    addAutoreplySchedule(schedule) {
+        const schedules = this.getAutoreplySchedules();
         schedules.push(schedule);
-        return this.saveAutoReplySchedules(schedules);
+        return this.saveAutoreplySchedules(schedules);
     }
 
-    updateAutoReplySchedule(id, updates) {
-        const schedules = this.getAutoReplySchedules();
+    updateAutoreplySchedule(id, updates) {
+        const schedules = this.getAutoreplySchedules();
         const index = schedules.findIndex(schedule => schedule.id === id);
         if (index !== -1) {
             schedules[index] = { ...schedules[index], ...updates };
-            return this.saveAutoReplySchedules(schedules);
+            return this.saveAutoreplySchedules(schedules);
         }
         return false;
     }
 
-    deleteAutoReplySchedule(id) {
-        const schedules = this.getAutoReplySchedules();
+    deleteAutoreplySchedule(id) {
+        const schedules = this.getAutoreplySchedules();
         const filteredSchedules = schedules.filter(schedule => schedule.id !== id);
-        return this.saveAutoReplySchedules(filteredSchedules);
+        return this.saveAutoreplySchedules(filteredSchedules);
     }
 
     // 自動回覆記錄管理
-    getAutoReplyLogs() {
-        return this.loadData(this.storageKeys.autoReplyLogs, []);
+    getAutoreplyLogs() {
+        return this.loadData(this.storageKeys.autoreplyLogs, []);
     }
 
-    saveAutoReplyLogs(logs) {
-        return this.saveData(this.storageKeys.autoReplyLogs, logs);
+    saveAutoreplyLogs(logs) {
+        return this.saveData(this.storageKeys.autoreplyLogs, logs);
     }
 
-    addAutoReplyLog(log) {
-        const logs = this.getAutoReplyLogs();
+    addAutoreplyLog(log) {
+        const logs = this.getAutoreplyLogs();
         const newLog = {
             id: this.generateId(),
             ...log,
@@ -462,14 +470,14 @@ class StorageManager {
             logs.splice(1000);
         }
         
-        return this.saveAutoReplyLogs(logs);
+        return this.saveAutoreplyLogs(logs);
     }
 
     // 取得自動回覆統計
-    getAutoReplyStats() {
-        const accounts = this.getAutoReplyAccounts();
-        const rules = this.getAutoReplyRules();
-        const logs = this.getAutoReplyLogs();
+    getAutoreplyStats() {
+        const accounts = this.getAutoreplyAccounts();
+        const rules = this.getAutoreplyRules();
+        const logs = this.getAutoreplyLogs();
         
         const today = new Date().toDateString();
         const todayLogs = logs.filter(log => 

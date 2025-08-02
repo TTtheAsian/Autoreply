@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🤖 AutoReply Tool - 自動回覆工具</title>
+    <title>🤖 Autoreply - 智能社群自動回覆工具</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🤖</text></svg>">
 </head>
@@ -12,7 +12,7 @@
     <nav class="navbar">
         <div class="nav-container">
             <div class="nav-logo">
-                <h1>🤖 AutoReply Tool</h1>
+                <h1>🤖 Autoreply</h1>
             </div>
             <ul class="nav-menu">
                 <li class="nav-item">
@@ -40,13 +40,19 @@
         <div id="dashboard" class="page active">
             <div class="page-header">
                 <h2>📊 儀表板</h2>
-                <p>歡迎使用 AutoReply Tool！這裡是您的自動回覆管理總覽。</p>
+                <p>歡迎使用 Autoreply！這裡是您的自動回覆管理總覽。</p>
                 <div class="header-actions">
                     <button class="btn btn-outline" onclick="refreshDashboard()">
                         🔄 重新整理
                     </button>
                     <button class="btn btn-outline" onclick="exportData()">
                         📤 匯出資料
+                    </button>
+                    <button class="btn btn-secondary" onclick="loadSampleData()" id="load-sample-btn">
+                        🧪 載入範例資料
+                    </button>
+                    <button class="btn btn-danger" onclick="clearAllData()" id="clear-data-btn" style="display: none;">
+                        🗑️ 清除資料
                     </button>
                 </div>
             </div>

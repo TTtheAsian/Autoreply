@@ -1,5 +1,5 @@
-// SocialManager 主要應用程式
-class AutoReplyTool {
+// Autoreply 主要應用程式
+class AutoreplyTool {
     constructor() {
         this.currentPage = 'dashboard';
     }
@@ -17,7 +17,28 @@ class AutoReplyTool {
             console.warn('⚠️ API 管理器初始化失敗:', error);
         }
         
+        // 設定初始按鈕狀態
+        this.setupInitialButtonState();
+        
         this.loadDashboardData();
+    }
+
+    // 設定初始按鈕狀態
+    setupInitialButtonState() {
+        const storage = new StorageManager();
+        const accounts = storage.getAutoreplyAccounts();
+        const rules = storage.getAutoreplyRules();
+        const hasData = accounts.length > 0 || rules.length > 0;
+        
+        const loadSampleBtn = document.getElementById('load-sample-btn');
+        const clearDataBtn = document.getElementById('clear-data-btn');
+        
+        if (loadSampleBtn) {
+            loadSampleBtn.style.display = hasData ? 'none' : 'inline-block';
+        }
+        if (clearDataBtn) {
+            clearDataBtn.style.display = hasData ? 'inline-block' : 'none';
+        }
     }
 
     setupNavigation() {
@@ -87,7 +108,7 @@ class AutoReplyTool {
                 this.loadDashboardData();
                 break;
             case 'auto-reply':
-                this.loadAutoReplyData();
+                this.loadAutoreplyData();
                 break;
         }
     }
@@ -97,9 +118,17 @@ class AutoReplyTool {
         const storage = new StorageManager();
         
         // 取得自動回覆統計資料
-        const accounts = storage.getAutoReplyAccounts();
-        const rules = storage.getAutoReplyRules();
-        const logs = storage.getAutoReplyLogs();
+        const accounts = storage.getAutoreplyAccounts();
+        const rules = storage.getAutoreplyRules();
+        const logs = storage.getAutoreplyLogs();
+
+        // 檢查是否有資料
+        const hasData = accounts.length > 0 || rules.length > 0 || logs.length > 0;
+        
+        if (!hasData) {
+            this.showEmptyState();
+            return;
+        }
 
         // 更新儀表板數字
         document.getElementById('connected-accounts').textContent = accounts.length;
@@ -116,6 +145,12 @@ class AutoReplyTool {
         const replyRate = todayReplies > 0 ? Math.min(95, 60 + Math.random() * 35) : 0;
         document.getElementById('reply-rate').textContent = `${Math.round(replyRate)}%`;
         
+        // 更新趨勢顯示
+        document.getElementById('accounts-trend').textContent = accounts.length > 0 ? '+2 本月' : '開始新增';
+        document.getElementById('rules-trend').textContent = rules.length > 0 ? '5 個待處理' : '開始建立';
+        document.getElementById('replies-trend').textContent = todayReplies > 0 ? '+15% 較昨日' : '開始回覆';
+        document.getElementById('rate-trend').textContent = replyRate > 0 ? '+5% 成長率' : '開始追蹤';
+        
         // 載入最近活動
         this.loadRecentActivities();
         
@@ -123,12 +158,71 @@ class AutoReplyTool {
         this.loadSystemNotifications();
     }
 
+    // 顯示空狀態
+    showEmptyState() {
+        // 隱藏統計卡片
+        const dashboardGrid = document.querySelector('.dashboard-grid');
+        if (dashboardGrid) {
+            dashboardGrid.style.display = 'none';
+        }
+
+        // 隱藏主要內容區域
+        const dashboardMain = document.querySelector('.dashboard-main');
+        if (dashboardMain) {
+            dashboardMain.style.display = 'none';
+        }
+
+        // 顯示空狀態訊息
+        const pageHeader = document.querySelector('.page-header');
+        if (pageHeader) {
+            const emptyState = document.createElement('div');
+            emptyState.className = 'empty-state';
+            emptyState.innerHTML = `
+                <div class="empty-state-content">
+                    <div class="empty-state-icon">🤖</div>
+                    <h3>歡迎使用 Autoreply！</h3>
+                    <p>您還沒有任何資料。請開始建立您的第一個自動回覆規則，或載入範例資料來體驗功能。</p>
+                    <div class="empty-state-actions">
+                        <button class="btn btn-primary" onclick="showAddAccountModal()">
+                            📱 新增第一個帳號
+                        </button>
+                        <button class="btn btn-secondary" onclick="loadSampleData()">
+                            🧪 載入範例資料
+                        </button>
+                    </div>
+                </div>
+            `;
+            pageHeader.appendChild(emptyState);
+        }
+    }
+
+    // 清除空狀態並顯示正常內容
+    clearEmptyState() {
+        // 移除空狀態元素
+        const emptyState = document.querySelector('.empty-state');
+        if (emptyState) {
+            emptyState.remove();
+        }
+
+        // 顯示統計卡片
+        const dashboardGrid = document.querySelector('.dashboard-grid');
+        if (dashboardGrid) {
+            dashboardGrid.style.display = 'grid';
+        }
+
+        // 顯示主要內容區域
+        const dashboardMain = document.querySelector('.dashboard-main');
+        if (dashboardMain) {
+            dashboardMain.style.display = 'block';
+        }
+    }
+
     // 載入最近活動
     loadRecentActivities() {
         const storage = new StorageManager();
-        const accounts = storage.getAutoReplyAccounts();
-        const rules = storage.getAutoReplyRules();
-        const logs = storage.getAutoReplyLogs();
+        const accounts = storage.getAutoreplyAccounts();
+        const rules = storage.getAutoreplyRules();
+        const logs = storage.getAutoreplyLogs();
         
         // 合併所有活動並按時間排序
         const activities = [];
@@ -174,7 +268,7 @@ class AutoReplyTool {
         if (!container) return;
         
         if (recentActivities.length === 0) {
-            container.innerHTML = '<p style="text-align: center; color: var(--text-secondary); font-size: 0.875rem;">尚無活動記錄</p>';
+            container.innerHTML = '<p style="text-align: center; color: var(--text-secondary); font-size: 0.875rem; padding: var(--spacing-md);">尚無活動記錄</p>';
             return;
         }
         
@@ -192,32 +286,49 @@ class AutoReplyTool {
 
     // 載入系統通知
     loadSystemNotifications() {
-        const notifications = [
-            {
-                type: 'info',
-                icon: 'ℹ️',
-                title: '系統更新',
-                description: '新版本已發布，包含效能優化',
-                time: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString() // 2小時前
-            },
-            {
-                type: 'warning',
-                icon: '⚠️',
-                title: '資料備份提醒',
-                description: '建議定期備份重要資料',
-                time: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString() // 4小時前
-            },
-            {
-                type: 'success',
-                icon: '✅',
-                title: '自動回覆啟用',
-                description: 'Instagram 自動回覆功能已啟用',
-                time: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString() // 6小時前
-            }
-        ];
+        const storage = new StorageManager();
+        const accounts = storage.getAutoreplyAccounts();
+        const rules = storage.getAutoreplyRules();
+        
+        // 檢查是否有實際資料，如果沒有則不顯示模擬通知
+        const hasData = accounts.length > 0 || rules.length > 0;
+        
+        let notifications = [];
+        
+        if (hasData) {
+            // 只有在有實際資料時才顯示系統通知
+            notifications = [
+                {
+                    type: 'info',
+                    icon: 'ℹ️',
+                    title: '系統更新',
+                    description: '新版本已發布，包含效能優化',
+                    time: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString() // 2小時前
+                },
+                {
+                    type: 'warning',
+                    icon: '⚠️',
+                    title: '資料備份提醒',
+                    description: '建議定期備份重要資料',
+                    time: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString() // 4小時前
+                },
+                {
+                    type: 'success',
+                    icon: '✅',
+                    title: '自動回覆啟用',
+                    description: 'Instagram 自動回覆功能已啟用',
+                    time: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString() // 6小時前
+                }
+            ];
+        }
         
         const container = document.getElementById('notifications-list');
         if (!container) return;
+        
+        if (notifications.length === 0) {
+            container.innerHTML = '<p style="text-align: center; color: var(--text-secondary); font-size: 0.875rem; padding: var(--spacing-md);">尚無系統通知</p>';
+            return;
+        }
         
         container.innerHTML = notifications.map(notification => `
             <div class="notification-item">
@@ -253,24 +364,37 @@ class AutoReplyTool {
     }
 
     // 載入自動回覆資料
-    loadAutoReplyData() {
-        this.loadAutoReplyAccounts();
-        this.loadAutoReplyRules();
-        this.loadAutoReplyTemplates();
-        this.loadAutoReplySchedules();
-        this.loadAutoReplyAnalytics();
+    loadAutoreplyData() {
+        this.loadAutoreplyAccounts();
+        this.loadAutoreplyRules();
+        this.loadAutoreplyTemplates();
+        this.loadAutoreplySchedules();
+        this.loadAutoreplyAnalytics();
     }
 
     // 載入自動回覆帳號
-    loadAutoReplyAccounts() {
+    loadAutoreplyAccounts() {
         const storage = new StorageManager();
-        const accounts = storage.getAutoReplyAccounts();
+        const accounts = storage.getAutoreplyAccounts();
         
         const container = document.getElementById('accounts-list');
         if (!container) return;
         
         if (accounts.length === 0) {
-            container.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: var(--spacing-xl);">尚無連接的帳號</p>';
+            container.innerHTML = `
+                <div class="empty-state" style="min-height: 200px;">
+                    <div class="empty-state-content">
+                        <div class="empty-state-icon">📱</div>
+                        <h3>尚無連接的帳號</h3>
+                        <p>您還沒有連接任何社群平台帳號。請點擊下方按鈕開始新增您的第一個帳號。</p>
+                        <div class="empty-state-actions">
+                            <button class="btn btn-primary" onclick="showAddAccountModal()">
+                                📱 新增帳號
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
             return;
         }
         
@@ -311,15 +435,28 @@ class AutoReplyTool {
     }
 
     // 載入自動回覆規則
-    loadAutoReplyRules() {
+    loadAutoreplyRules() {
         const storage = new StorageManager();
-        const rules = storage.getAutoReplyRules();
+        const rules = storage.getAutoreplyRules();
         
         const container = document.getElementById('rules-list');
         if (!container) return;
         
         if (rules.length === 0) {
-            container.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: var(--spacing-xl);">尚無回覆規則</p>';
+            container.innerHTML = `
+                <div class="empty-state" style="min-height: 200px;">
+                    <div class="empty-state-content">
+                        <div class="empty-state-icon">🤖</div>
+                        <h3>尚無回覆規則</h3>
+                        <p>您還沒有建立任何自動回覆規則。請點擊下方按鈕開始建立您的第一個規則。</p>
+                        <div class="empty-state-actions">
+                            <button class="btn btn-primary" onclick="showAddRuleModal()">
+                                🤖 新增規則
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
             return;
         }
         
@@ -355,15 +492,28 @@ class AutoReplyTool {
     }
 
     // 載入自動回覆範本
-    loadAutoReplyTemplates() {
+    loadAutoreplyTemplates() {
         const storage = new StorageManager();
-        const templates = storage.getAutoReplyTemplates();
+        const templates = storage.getAutoreplyTemplates();
         
         const container = document.getElementById('templates-list');
         if (!container) return;
         
         if (templates.length === 0) {
-            container.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: var(--spacing-xl);">尚無回覆範本</p>';
+            container.innerHTML = `
+                <div class="empty-state" style="min-height: 200px;">
+                    <div class="empty-state-content">
+                        <div class="empty-state-icon">📝</div>
+                        <h3>尚無回覆範本</h3>
+                        <p>您還沒有建立任何回覆範本。請點擊下方按鈕開始建立您的第一個範本。</p>
+                        <div class="empty-state-actions">
+                            <button class="btn btn-primary" onclick="showAddTemplateModal()">
+                                📝 新增範本
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
             return;
         }
         
@@ -397,15 +547,28 @@ class AutoReplyTool {
     }
 
     // 載入自動回覆排程
-    loadAutoReplySchedules() {
+    loadAutoreplySchedules() {
         const storage = new StorageManager();
-        const schedules = storage.getAutoReplySchedules();
+        const schedules = storage.getAutoreplySchedules();
         
         const container = document.getElementById('schedule-list');
         if (!container) return;
         
         if (schedules.length === 0) {
-            container.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: var(--spacing-xl);">尚無排程設定</p>';
+            container.innerHTML = `
+                <div class="empty-state" style="min-height: 200px;">
+                    <div class="empty-state-content">
+                        <div class="empty-state-icon">⏰</div>
+                        <h3>尚無排程設定</h3>
+                        <p>您還沒有設定任何自動回覆排程。請點擊下方按鈕開始設定您的第一個排程。</p>
+                        <div class="empty-state-actions">
+                            <button class="btn btn-primary" onclick="showAddScheduleModal()">
+                                ⏰ 新增排程
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
             return;
         }
         
@@ -441,13 +604,13 @@ class AutoReplyTool {
     }
 
     // 載入自動回覆統計
-    loadAutoReplyAnalytics() {
+    loadAutoreplyAnalytics() {
         const storage = new StorageManager();
-        const logs = storage.getAutoReplyLogs();
+        const logs = storage.getAutoreplyLogs();
         
         // 更新詳細統計
-        const accounts = storage.getAutoReplyAccounts();
-        const rules = storage.getAutoReplyRules();
+        const accounts = storage.getAutoreplyAccounts();
+        const rules = storage.getAutoreplyRules();
         
         document.getElementById('connected-accounts-detail').textContent = accounts.length;
         document.getElementById('active-rules-detail').textContent = rules.filter(r => r.status === 'active').length;
@@ -470,7 +633,7 @@ class AutoReplyTool {
     // 載入最近回覆記錄
     loadRecentReplies() {
         const storage = new StorageManager();
-        const logs = storage.getAutoReplyLogs();
+        const logs = storage.getAutoreplyLogs();
         
         const container = document.getElementById('recent-replies-list');
         if (!container) return;
@@ -613,7 +776,7 @@ class AutoReplyTool {
 async function connectAccount(accountId) {
     try {
         const storage = new StorageManager();
-        const accounts = storage.getAutoReplyAccounts();
+        const accounts = storage.getAutoreplyAccounts();
         const account = accounts.find(acc => acc.id === accountId);
         
         if (!account) {
@@ -628,7 +791,7 @@ async function connectAccount(accountId) {
         
         if (result.success) {
             app.showNotification('帳號連接成功！', 'success');
-            app.loadAutoReplyAccounts(); // 重新載入帳號列表
+            app.loadAutoreplyAccounts(); // 重新載入帳號列表
             app.loadDashboardData(); // 更新儀表板
         } else {
             app.showNotification('帳號連接失敗: ' + result.message, 'error');
@@ -645,7 +808,7 @@ async function disconnectAccount(accountId) {
         if (confirm('確定要斷開此帳號的連接嗎？')) {
             window.apiManager.disconnectAccount(accountId);
             app.showNotification('帳號已斷開連接', 'success');
-            app.loadAutoReplyAccounts(); // 重新載入帳號列表
+            app.loadAutoreplyAccounts(); // 重新載入帳號列表
             app.loadDashboardData(); // 更新儀表板
         }
     } catch (error) {
@@ -707,11 +870,11 @@ function showAddAccountModal() {
         };
 
         const storage = new StorageManager();
-        storage.addAutoReplyAccount(accountData);
+        storage.addAutoreplyAccount(accountData);
         
         app.closeModal(modal);
         app.showNotification('帳號新增成功', 'success');
-        app.loadAutoReplyAccounts();
+        app.loadAutoreplyAccounts();
         app.loadDashboardData();
     });
 }
@@ -773,11 +936,11 @@ function showAddRuleModal() {
         };
 
         const storage = new StorageManager();
-        storage.addAutoReplyRule(ruleData);
+        storage.addAutoreplyRule(ruleData);
         
         app.closeModal(modal);
         app.showNotification('規則新增成功', 'success');
-        app.loadAutoReplyRules();
+        app.loadAutoreplyRules();
         app.loadDashboardData();
     });
 }
@@ -827,11 +990,11 @@ function showAddTemplateModal() {
         };
 
         const storage = new StorageManager();
-        storage.addAutoReplyTemplate(templateData);
+        storage.addAutoreplyTemplate(templateData);
         
         app.closeModal(modal);
         app.showNotification('範本新增成功', 'success');
-        app.loadAutoReplyTemplates();
+        app.loadAutoreplyTemplates();
     });
 }
 
@@ -886,7 +1049,7 @@ function showAddScheduleModal() {
     
     // 載入規則選項
     const storage = new StorageManager();
-    const rules = storage.getAutoReplyRules();
+    const rules = storage.getAutoreplyRules();
     const ruleSelect = modal.querySelector('select[name="ruleId"]');
     rules.forEach(rule => {
         const option = document.createElement('option');
@@ -914,11 +1077,11 @@ function showAddScheduleModal() {
             createdAt: new Date().toISOString()
         };
 
-        storage.addAutoReplySchedule(scheduleData);
+        storage.addAutoreplySchedule(scheduleData);
         
         app.closeModal(modal);
         app.showNotification('排程新增成功', 'success');
-        app.loadAutoReplySchedules();
+        app.loadAutoreplySchedules();
     });
 }
 
@@ -951,11 +1114,11 @@ function refreshDashboard() {
 function exportData() {
     const storage = new StorageManager();
     const data = {
-        autoReplyAccounts: storage.getAutoReplyAccounts(),
-        autoReplyRules: storage.getAutoReplyRules(),
-        autoReplyTemplates: storage.getAutoReplyTemplates(),
-        autoReplySchedules: storage.getAutoReplySchedules(),
-        autoReplyLogs: storage.getAutoReplyLogs(),
+        autoreplyAccounts: storage.getAutoreplyAccounts(),
+        autoreplyRules: storage.getAutoreplyRules(),
+        autoreplyTemplates: storage.getAutoreplyTemplates(),
+        autoreplySchedules: storage.getAutoreplySchedules(),
+        autoreplyLogs: storage.getAutoreplyLogs(),
         exportDate: new Date().toISOString()
     };
     
@@ -992,7 +1155,7 @@ function navigateToPage(pageName) {
 // 帳號管理函數
 function editAccount(accountId) {
     const storage = new StorageManager();
-    const accounts = storage.getAutoReplyAccounts();
+    const accounts = storage.getAutoreplyAccounts();
     const account = accounts.find(acc => acc.id === accountId);
     
     if (!account) {
@@ -1051,20 +1214,20 @@ function editAccount(accountId) {
             updatedAt: new Date().toISOString()
         };
 
-        storage.updateAutoReplyAccount(accountId, updatedAccount);
+        storage.updateAutoreplyAccount(accountId, updatedAccount);
         
         app.closeModal(modal);
         app.showNotification('帳號更新成功', 'success');
-        app.loadAutoReplyAccounts();
+        app.loadAutoreplyAccounts();
     });
 }
 
 function deleteAccount(accountId) {
     if (confirm('確定要刪除此帳號嗎？此操作無法復原。')) {
         const storage = new StorageManager();
-        storage.deleteAutoReplyAccount(accountId);
+        storage.deleteAutoreplyAccount(accountId);
         app.showNotification('帳號已刪除', 'success');
-        app.loadAutoReplyAccounts();
+        app.loadAutoreplyAccounts();
         app.loadDashboardData();
     }
 }
@@ -1072,7 +1235,7 @@ function deleteAccount(accountId) {
 // 規則管理函數
 function toggleRuleStatus(ruleId) {
     const storage = new StorageManager();
-    const rules = storage.getAutoReplyRules();
+    const rules = storage.getAutoreplyRules();
     const rule = rules.find(r => r.id === ruleId);
     
     if (!rule) {
@@ -1086,14 +1249,14 @@ function toggleRuleStatus(ruleId) {
         updatedAt: new Date().toISOString()
     };
 
-    storage.updateAutoReplyRule(ruleId, updatedRule);
+    storage.updateAutoreplyRule(ruleId, updatedRule);
     app.showNotification(`規則已${updatedRule.status === 'active' ? '啟用' : '停用'}`, 'success');
-    app.loadAutoReplyRules();
+    app.loadAutoreplyRules();
 }
 
 function editRule(ruleId) {
     const storage = new StorageManager();
-    const rules = storage.getAutoReplyRules();
+    const rules = storage.getAutoreplyRules();
     const rule = rules.find(r => r.id === ruleId);
     
     if (!rule) {
@@ -1158,26 +1321,71 @@ function editRule(ruleId) {
             updatedAt: new Date().toISOString()
         };
 
-        storage.updateAutoReplyRule(ruleId, updatedRule);
+        storage.updateAutoreplyRule(ruleId, updatedRule);
         
         app.closeModal(modal);
         app.showNotification('規則更新成功', 'success');
-        app.loadAutoReplyRules();
+        app.loadAutoreplyRules();
     });
 }
 
 function deleteRule(ruleId) {
     if (confirm('確定要刪除此規則嗎？此操作無法復原。')) {
         const storage = new StorageManager();
-        storage.deleteAutoReplyRule(ruleId);
+        storage.deleteAutoreplyRule(ruleId);
         app.showNotification('規則已刪除', 'success');
-        app.loadAutoReplyRules();
+        app.loadAutoreplyRules();
+    }
+}
+
+// 載入範例資料函數
+function loadSampleData() {
+    if (confirm('確定要載入範例資料嗎？這將新增一些測試用的帳號、規則和範本。')) {
+        const storage = new StorageManager();
+        storage.loadSampleData();
+        
+        // 清除空狀態並重新載入儀表板
+        app.clearEmptyState();
+        app.loadDashboardData();
+        
+        // 隱藏載入範例資料按鈕，顯示清除資料按鈕
+        const loadSampleBtn = document.getElementById('load-sample-btn');
+        const clearDataBtn = document.getElementById('clear-data-btn');
+        if (loadSampleBtn) {
+            loadSampleBtn.style.display = 'none';
+        }
+        if (clearDataBtn) {
+            clearDataBtn.style.display = 'inline-block';
+        }
+    }
+}
+
+// 清除所有資料函數
+function clearAllData() {
+    if (confirm('確定要清除所有資料嗎？此操作無法復原，所有帳號、規則、範本和記錄都將被刪除。')) {
+        const storage = new StorageManager();
+        storage.clearAllData();
+        
+        // 重新載入儀表板，顯示空狀態
+        app.loadDashboardData();
+        
+        // 顯示載入範例資料按鈕，隱藏清除資料按鈕
+        const loadSampleBtn = document.getElementById('load-sample-btn');
+        const clearDataBtn = document.getElementById('clear-data-btn');
+        if (loadSampleBtn) {
+            loadSampleBtn.style.display = 'inline-block';
+        }
+        if (clearDataBtn) {
+            clearDataBtn.style.display = 'none';
+        }
+        
+        app.showNotification('✅ 所有資料已清除', 'success');
     }
 }
 
 // 初始化應用程式
 let app;
 document.addEventListener('DOMContentLoaded', () => {
-    app = new AutoReplyTool();
+    app = new AutoreplyTool();
     app.init();
 }); 
