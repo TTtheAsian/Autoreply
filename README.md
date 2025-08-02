@@ -1,6 +1,7 @@
 # 🤖 Autoreply - 智能社群自動回覆工具
 
 [![Deploy to GitHub Pages](https://github.com/TTtheAsian/Autoreply/workflows/Deploy%20to%20GitHub%20Pages/badge.svg)](https://github.com/TTtheAsian/Autoreply/actions)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Online-green.svg)](https://TTtheAsian.github.io/Autoreply)
 
 <div align="center">
 
